@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSage - Smart Farming Assistant | AGRI DOC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .card-img-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--feature-icon-color, #6c757d);
+        }
+        .feature-card .card-body {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .feature-card .btn {
+            margin-top: auto;
+            align-self: flex-start;
+        }
+        
+        /* Card specific colors */
+        .card-bio-climate {
+            --feature-icon-color: #0d6efd;
+            border-color: #0d6efd !important;
+        }
+        .card-consult-doctor {
+            --feature-icon-color: #198754;
+            border-color: #198754 !important;
+        }
+        .card-crop-calendar {
+            --feature-icon-color: #ffc107;
+            border-color: #ffc107 !important;
+        }
+        
+        /* Ensure consistent height for all cards */
+        .feature-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        .feature-col {
+            padding: 0 10px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Modal adjustments */
+        .modal-content {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .modal-header {
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        /* Chat styles */
+        .chat-message {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chat-message .bg-light {
+            position: relative;
+            border-radius: 1rem;
+        }
+        
+        .chat-message .bg-light:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15px;
+            width: 0;
+            height: 0;
+            border: 10px solid transparent;
+            border-right-color: #f8f9fa;
+            border-left: 0;
+            margin-top: -10px;
+            margin-left: -10px;
+        }
+        
+        .chat-message.user-message .bg-light {
+            background-color: #e3f2fd !important;
+        }
+        
+        .chat-message.user-message .bg-light:after {
+            border-right-color: #e3f2fd;
+            left: auto;
+            right: 0;
+            border-right: 0;
+            border-left: 10px solid transparent;
+            margin-left: 0;
+            margin-right: -10px;
+        }
+        
+        .chat-message.user-message {
+            flex-direction: row-reverse;
+        }
+        
+        .chat-message.user-message .me-2 {
+            margin-right: 0 !important;
+            margin-left: 0.5rem !important;
+        }
+        
+        #quickReplies {
+            max-width: 100%;
+        }
+        
+        #quickReplies button {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid min-vh-100 d-flex flex-column">
+        <!-- Header -->
+        <header class="bg-primary text-white py-3">
+            <div class="container d-flex justify-content-between align-items-center">
+                <a href="index.html" class="text-white text-decoration-none">
+                    <h1 class="h4 mb-0">AGRI SAGE</h1>
+                </a>
+                <nav>
+                    <a href="index.html" class="btn btn-outline-light btn-sm me-2">
+                        <i class="bi bi-house-door"></i> Home
+                    </a>
+                    <a href="agrognosis.html" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-bug"></i> Agrognosis
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 py-4">
+            <div class="container">
+                <!-- Location and Weather Bar -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                                    <span id="location">Detecting location...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-cloud-sun-fill text-warning me-2"></i>
+                                        <span id="weather">Loading weather...</span>
+                                    </div>
+                                    <div id="weatherIcon"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Features Grid -->
+                <div class="row feature-row">
+                    <!-- Bio-Climate Simulation -->
+                    <div class="col-md-4 feature-col">
+                        <div class="card feature-card h-100 card-bio-climate">
+                            <div class="card-body text-center p-4">
+                                <div class="card-img-icon">
+                                    <i class="bi bi-cloud-sun"></i>
+                                </div>
+                                <h5 class="card-title">Bio-Climate Simulation</h5>
+                                <p class="card-text text-muted">Analyze plant health with advanced bio-climate simulation and get smart recommendations.</p>
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bioClimateModal">
+                                    Run Simulation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consult Doctor -->
+                    <div class="col-md-4 feature-col">
+                        <div class="card feature-card h-100 card-consult-doctor">
+                            <div class="card-body text-center p-4">
+                                <div class="card-img-icon">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <h5 class="card-title">Consult Nearby Doctor</h5>
+                                <p class="card-text text-muted">Connect with agricultural experts and doctors in your area for personalized advice.</p>
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#doctorModal">
+                                    Find Doctors
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Crop Calendar -->
+                    <div class="col-md-4 feature-col">
+                        <div class="card feature-card h-100 card-crop-calendar">
+                            <div class="card-body text-center p-4">
+                                <div class="card-img-icon">
+                                    <i class="bi bi-calendar3"></i>
+                                </div>
+                                <h5 class="card-title">Crop Calendar</h5>
+                                <p class="card-text text-muted">Plan your farming activities with our AI-powered crop calendar and seasonal guides.</p>
+                                <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#cropCalendarModal">
+                                    View Calendar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Counselor & Local Shop Locator -->
+                    <div class="col-md-6">
+                        <div class="card feature-card h-100 border-primary">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="card-img-icon bg-primary bg-opacity-10 p-3 rounded-circle">
+                                        <i class="bi bi-people text-primary"></i>
+                                    </div>
+                                    <span class="badge bg-primary">New</span>
+                                </div>
+                                <h5 class="card-title">Counselor & Local Shop Locator</h5>
+                                <p class="card-text text-muted">Find agricultural experts and local shops for all your farming needs. Get expert advice and purchase supplies easily.</p>
+                                <button class="btn btn-outline-primary mt-auto align-self-start" data-bs-toggle="modal" data-bs-target="#locatorModal">
+                                    Explore Now <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Reports -->
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card feature-card h-100 border-info">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-file-earmark-medical text-info me-2"></i>My Reports
+                                    </h5>
+                                    <a href="#" class="btn btn-sm btn-outline-info">View All</a>
+                                </div>
+                                <div id="recentReports">
+                                    <p class="text-muted text-center py-3">No recent reports. Run a simulation to see your reports here.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Consultations -->
+                    <div class="col-md-6">
+                        <div class="card feature-card h-100 border-secondary">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-chat-dots text-secondary me-2"></i>My Consultations
+                                    </h5>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">View All</a>
+                                </div>
+                                <div id="recentConsultations">
+                                    <p class="text-muted text-center py-3">No recent consultations. Book a consultation to get started.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-3">
+            <div class="container text-center">
+                <p class="mb-0 small">&copy; 2023 AGRI DOC. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bio-Climate Simulation Modal -->
+    <div class="modal fade" id="bioClimateModal" tabindex="-1" aria-labelledby="bioClimateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="bioClimateModalLabel">
+                        <i class="bi bi-thermometer-sun me-2"></i>Bio-Climate Simulation
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Simulate crop growth conditions based on environmental parameters. Get personalized recommendations for optimal crop health.
+                    </div>
+                    
+                    <form id="bioClimateForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Crop & Location</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="cropType" class="form-label">Crop Type</label>
+                                            <select class="form-select" id="cropType" name="cropType" required>
+                                                <option value="" selected disabled>Select a crop</option>
+                                                <option value="rice">Rice</option>
+                                                <option value="wheat">Wheat</option>
+                                                <option value="maize">Maize</option>
+                                                <option value="sugarcane">Sugarcane</option>
+                                                <option value="cotton">Cotton</option>
+                                                <option value="vegetables">Vegetables</option>
+                                                <option value="fruits">Fruits</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="location" class="form-label">Location</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                                <input type="text" class="form-control" id="location" placeholder="Enter location" value="Coimbatore, Tamil Nadu">
+                                                <button class="btn btn-outline-secondary" type="button" id="useCurrentLocation">
+                                                    <i class="bi bi-geo-alt-fill"></i> Use Current
+                                                </button>
+                                            </div>
+                                            <div class="form-text">Or enter coordinates manually below</div>
+                                        </div>
+                                        
+                                        <div class="row g-2">
+                                            <div class="col-md-6">
+                                                <div class="input-group">
+                                                    <span class="input-group-text">Lat</span>
+                                                    <input type="number" class="form-control" id="locationLat" name="locationLat" 
+                                                           step="0.0001" min="-90" max="90" placeholder="e.g. 11.0168">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="input-group">
+                                                    <span class="input-group-text">Lng</span>
+                                                    <input type="number" class="form-control" id="locationLng" name="locationLng" 
+                                                           step="0.0001" min="-180" max="180" placeholder="e.g. 76.9558">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Environmental Parameters</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="temperature" class="form-label">
+                                                Temperature <span id="temperatureValue">25</span>°C
+                                            </label>
+                                            <input type="range" class="form-range" id="temperature" name="temperature" 
+                                                   min="0" max="50" step="0.1" value="25" 
+                                                   oninput="document.getElementById('temperatureValue').textContent = this.value">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">0°C</small>
+                                                <small class="text-muted">50°C</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="humidity" class="form-label">
+                                                Humidity <span id="humidityValue">60</span>%
+                                            </label>
+                                            <input type="range" class="form-range" id="humidity" name="humidity" 
+                                                   min="0" max="100" step="1" value="60"
+                                                   oninput="document.getElementById('humidityValue').textContent = this.value">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">0%</small>
+                                                <small class="text-muted">100%</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="soilMoisture" class="form-label">
+                                                Soil Moisture <span id="soilMoistureValue">50</span>%
+                                            </label>
+                                            <input type="range" class="form-range" id="soilMoisture" name="soilMoisture" 
+                                                   min="0" max="100" step="1" value="50"
+                                                   oninput="document.getElementById('soilMoistureValue').textContent = this.value">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">0% (Dry)</small>
+                                                <small class="text-muted">100% (Saturated)</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="soilPh" class="form-label">
+                                                Soil pH <span id="soilPhValue">6.5</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="soilPh" name="soilPh" 
+                                                   min="0" max="14" step="0.1" value="6.5"
+                                                   oninput="document.getElementById('soilPhValue').textContent = this.value">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">0 (Acidic)</small>
+                                                <small class="text-muted">14 (Alkaline)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Field Image (Optional)</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="fieldImage" class="form-label">Upload an image of your field</label>
+                                                    <input class="form-control" type="file" id="fieldImage" name="fieldImage" 
+                                                           accept="image/jpeg, image/png">
+                                                    <div class="form-text">Max size: 5MB. Supported formats: JPG, PNG</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 text-center">
+                                                <div id="imagePreviewContainer" class="d-none">
+                                                    <div class="position-relative d-inline-block">
+                                                        <img id="imagePreview" src="#" alt="Field preview" class="img-thumbnail" style="max-height: 150px;">
+                                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-1 bg-white rounded-circle p-2" 
+                                                                id="removeImage" style="font-size: 0.7rem;"></button>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small id="fileName" class="text-muted">No file selected</small>
+                                                    </div>
+                                                </div>
+                                                <div id="noImagePreview" class="text-muted">
+                                                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                                    <p class="mb-0">No image selected</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="runSimulation">
+                                <i class="bi bi-play-circle me-2"></i> Run Simulation
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Results will be loaded here -->
+                    <div id="simulationResults" class="mt-4"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="saveSimulation">
+                        <i class="bi bi-save me-1"></i> Save Simulation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consult Doctor Modal -->
+    <div class="modal fade" id="doctorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Find & Consult Doctors</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Search and Filters -->
+                    <div class="mb-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" id="doctorSearchInput" class="form-control" placeholder="Search by name, specialization, or keywords..." autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" data-view="list" title="List View">
+                                        <i class="bi bi-list-ul"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary active" data-view="grid" title="Grid View">
+                                        <i class="bi bi-grid"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Specialization</label>
+                                <select class="form-select" id="specializationFilter">
+                                    <option value="">All Specialties</option>
+                                    <option>Plant Pathology</option>
+                                    <option>Soil Science</option>
+                                    <option>Horticulture</option>
+                                    <option>Entomology</option>
+                                    <option>Crop Protection</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Availability</label>
+                                <select class="form-select" id="availabilityFilter">
+                                    <option value="">All</option>
+                                    <option value="available">Available Now</option>
+                                    <option value="offline">Offline</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Sort By</label>
+                                <select class="form-select" id="sortBy">
+                                    <option value="rating-desc">Highest Rated</option>
+                                    <option value="experience-desc">Most Experienced</option>
+                                    <option value="name-asc">Name (A-Z)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span id="resultsCount" class="text-muted small">Loading doctors...</span>
+                                <div id="activeFilters" class="d-inline-flex flex-wrap gap-2 ms-2">
+                                    <!-- Active filters will appear here -->
+                                </div>
+                            </div>
+                            <button id="resetFiltersBtn" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div id="loadingIndicator" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Finding available doctors...</p>
+                    </div>
+                    
+                    <!-- No Results Message -->
+                    <div id="noResults" class="text-center py-5 d-none">
+                        <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+                        <h5 class="mt-3">No doctors found</h5>
+                        <p class="text-muted">Try adjusting your search criteria or reset the filters</p>
+                        <button class="btn btn-outline-primary mt-2" id="resetFiltersBtn2">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset All Filters
+                        </button>
+                    </div>
+                    
+                    <!-- Doctors List -->
+                    <div id="doctorsList" class="row row-cols-1 g-3">
+                        <!-- Doctors will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-success" id="findNearbyDoctors">
+                        <i class="bi bi-geo-alt me-1"></i> Find Nearby Doctors
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop Calendar Modal -->
+    <div class="modal fade" id="cropCalendarModal" tabindex="-1" aria-labelledby="cropCalendarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="cropCalendarModalLabel">
+                        <i class="bi bi-calendar3-range me-2"></i>Crop Calendar & Weather
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Crop Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="cropCalendarForm">
+                                        <div class="mb-3">
+                                            <label for="cropType" class="form-label">Crop Type</label>
+                                            <select class="form-select" id="cropType" required>
+                                                <option value="">Select a crop</option>
+                                                <option value="rice">Rice</option>
+                                                <option value="wheat">Wheat</option>
+                                                <option value="maize">Maize</option>
+                                                <option value="cotton">Cotton</option>
+                                                <option value="sugarcane">Sugarcane</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="variety" class="form-label">Variety</label>
+                                            <select class="form-select" id="variety">
+                                                <option value="default">Standard Variety</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="plantingDate" class="form-label">Planting Date</label>
+                                            <input type="date" class="form-control" id="plantingDate" required>
+                                        </div>
+                                        
+                                        <div class="alert alert-info small">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Select your crop and planting date to generate a personalized calendar.
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div id="cropCalendar">
+                                <!-- Calendar will be rendered here by JavaScript -->
+                                <div class="text-center p-5 border rounded bg-light">
+                                    <div class="mb-3">
+                                        <i class="bi bi-calendar3 text-muted" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5>No Crop Selected</h5>
+                                    <p class="text-muted">
+                                        Select a crop and planting date to view the cultivation calendar.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Legend</h6>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary">
+                                            <i class="bi bi-printer me-1"></i> Print
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary">
+                                            <i class="bi bi-download me-1"></i> Export
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary">
+                                            <i class="bi bi-bell me-1"></i> Set Reminders
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-arrow-down-circle me-1"></i> Planting
+                                    </span>
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-arrow-up-circle me-1"></i> Harvesting
+                                    </span>
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-tools me-1"></i> Maintenance
+                                    </span>
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-droplet me-1"></i> Irrigation
+                                    </span>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-flower1 me-1"></i> Fertilization
+                                    </span>
+                                </div>
+                                
+                                <div class="mt-3 small text-muted">
+                                    <p class="mb-1"><strong>Note:</strong> This calendar provides estimated dates based on standard growing conditions. Actual timing may vary based on local conditions, weather, and specific crop varieties.</p>
+                                    <p class="mb-0">For personalized recommendations, ensure your location is set correctly for accurate weather data.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i> Close
+                    </button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-success">
+                            <i class="bi bi-calendar-plus me-1"></i> Add to My Calendar
+                        </button>
+                        <button type="button" class="btn btn-success">
+                            <i class="bi bi-save me-1"></i> Save Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bioclimatic Simulation Modal -->
+    <div class="modal fade" id="bioclimaticModal" tabindex="-1" aria-labelledby="bioclimaticModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="bioclimaticModalLabel">
+                        <i class="bi bi-graph-up-arrow me-2"></i>Bioclimatic Simulation
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Simulate crop growth based on environmental conditions. Upload your data or enter values manually.
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Simulation Parameters</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="cropType" class="form-label">Crop Type</label>
+                                        <select class="form-select" id="cropType">
+                                            <option value="rice">Rice</option>
+                                            <option value="wheat">Wheat</option>
+                                            <option value="maize">Maize</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="temperature" class="form-label">
+                                            Temperature (°C)
+                                            <span class="text-muted small">(10-40°C)</span>
+                                        </label>
+                                        <input type="number" class="form-control" id="temperature" min="10" max="40" value="25" step="0.1">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="rainfall" class="form-label">
+                                            Rainfall (mm/season)
+                                            <span class="text-muted small">(0-3000mm)</span>
+                                        </label>
+                                        <input type="number" class="form-control" id="rainfall" min="0" max="3000" value="1000">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="solarRad" class="form-label">
+                                            Solar Radiation (MJ/m²/day)
+                                            <span class="text-muted small">(0-30)</span>
+                                        </label>
+                                        <input type="number" class="form-control" id="solarRad" min="0" max="30" value="18" step="0.1">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="soilMoisture" class="form-label">
+                                            Soil Moisture (%)
+                                            <span class="text-muted small">(0-100%)</span>
+                                        </label>
+                                        <input type="number" class="form-control" id="soilMoisture" min="0" max="100" value="70">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Data Import</h6>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <div class="text-center p-4 border rounded bg-light mb-3">
+                                        <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2"></i>
+                                        <h5>Upload Weather Data</h5>
+                                        <p class="text-muted small mb-3">
+                                            Upload CSV or Excel file with historical weather data
+                                        </p>
+                                        <div class="d-grid">
+                                            <input type="file" class="form-control" id="simulationUpload" accept=".csv, .xlsx, .xls">
+                                        </div>
+                                        <div id="fileName" class="small text-muted mt-2">No file selected</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="fieldImage" class="form-label">Upload Field Image</label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="fieldImage" accept="image/*" capture="environment">
+                                        </div>
+                                        <div class="form-text">Take or upload a photo of your field for analysis</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div id="imagePreview" class="mb-3 d-none">
+                                            <img id="previewImg" src="#" alt="Field preview" class="img-fluid rounded border" style="max-height: 200px;">
+                                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="removeImage">
+                                                <i class="bi bi-trash me-1"></i>Remove Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-warning small mt-auto">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        For best results, provide at least 30 days of historical data including temperature, rainfall, and soil moisture.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="runSimulation">
+                            <i class="bi bi-play-circle me-2"></i> Run Simulation
+                        </button>
+                    </div>
+                    
+                    <!-- Simulation Results Container -->
+                    <div id="simulationResults" class="mt-4">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-outline-primary">
+                        <i class="bi bi-download me-1"></i> Export Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Consultation Modal -->
+    <div class="modal fade" id="consultationModal" tabindex="-1" aria-labelledby="consultationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <div>
+                        <h5 class="modal-title mb-0" id="consultationModalLabel">
+                            <i class="bi bi-camera-video me-2"></i>
+                            <span id="consultingDoctorName">Doctor</span>
+                            <span class="badge bg-white bg-opacity-25 ms-2" id="callStatus">
+                                <span class="pulse-dot me-1"></span>
+                                Connecting...
+                            </span>
+                        </h5>
+                        <div class="text-white-50 small" id="consultingDoctorSpecialty">Specialist</div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-white bg-opacity-25 me-2" id="callDuration">00:00</span>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="row g-0" style="min-height: 60vh;">
+                        <!-- Video Container -->
+                        <div class="col-lg-8 position-relative" id="videoContainer">
+                            <!-- Remote Video -->
+                            <div class="h-100 bg-dark d-flex align-items-center justify-content-center">
+                                <div class="text-center text-white">
+                                    <div class="avatar avatar-xxl rounded-circle bg-dark bg-opacity-50 mb-3">
+                                        <i class="bi bi-person-video3 text-white-50" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 id="remoteDoctorName">Connecting to doctor...</h5>
+                                    <p class="text-white-50 mb-0" id="callStatusText">Please wait while we connect you</p>
+                                </div>
+                                <video id="remoteVideo" class="d-none" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            </div>
+                            
+                            <!-- Local Video -->
+                            <div class="position-absolute" style="bottom: 1rem; right: 1rem; width: 25%; max-width: 200px; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+                                <video id="localVideo" autoplay muted playsinline style="width: 100%; background: #000;"></video>
+                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25">
+                                    <i class="bi bi-person-video3 text-white" style="font-size: 1.5rem;"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Call Controls -->
+                            <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 d-flex justify-content-center gap-3">
+                                <button class="btn btn-light btn-rounded-circle" id="toggleVideoBtn" data-video-on="true" title="Turn off camera">
+                                    <i class="bi bi-camera-video"></i>
+                                </button>
+                                <button class="btn btn-light btn-rounded-circle" id="toggleAudioBtn" data-audio-on="true" title="Mute">
+                                    <i class="bi bi-mic"></i>
+                                </button>
+                                <button class="btn btn-danger btn-rounded-circle" id="endCallBtn" title="End call">
+                                    <i class="bi bi-telephone-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Container -->
+                        <div class="col-lg-4 d-flex flex-column border-start" id="chatContainer">
+                            <div class="d-flex align-items-center p-3 border-bottom">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">Chat</h6>
+                                </div>
+                                <button class="btn btn-sm btn-outline-secondary" id="toggleChatBtn" title="Minimize chat">
+                                    <i class="bi bi-dash-lg"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="flex-grow-1 overflow-auto p-3" id="chatMessages" style="min-height: 200px;">
+                                <!-- Messages will be inserted here by JavaScript -->
+                                <div class="text-center text-muted my-5">
+                                    <i class="bi bi-chat-square-text fs-1 opacity-25 mb-3"></i>
+                                    <p>Send a message to start chatting</p>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 border-top">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="messageInput" placeholder="Type a message...">
+                                    <button class="btn btn-primary" type="button" id="sendMessageBtn">
+                                        <i class="bi bi-send"></i>
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" title="Attach file">
+                                            <i class="bi bi-paperclip"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" title="Send image">
+                                            <i class="bi bi-image"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="prescriptionBtn">
+                                        <i class="bi bi-file-earmark-medical me-1"></i> Request Prescription
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button class="btn btn-primary rounded-circle position-fixed" style="bottom: 30px; right: 30px; width: 60px; height: 60px; font-size: 24px;" data-bs-toggle="modal" data-bs-target="#chatModal">
+        <i class="bi bi-chat-dots"></i>
+    </button>
+
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 500px;">
+            <div class="modal-content h-100">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">AgriSage Assistant</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 d-flex flex-column">
+                    <!-- Chat Header with Quick Actions -->
+                    <div class="bg-light p-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="badge bg-success">Online</span>
+                                <small class="text-muted ms-2">Ask me anything about farming</small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="quickActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Quick Actions
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="quickActionsDropdown">
+                                    <li><a class="dropdown-item" href="#" onclick="handleQuickAction('start_farming')">Start Farming Guide</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="handleQuickAction('find_land')">Find Agricultural Land</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="handleQuickAction('explore_schemes')">Government Schemes</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#landExplorerModal"><i class="bi bi-geo-alt me-2"></i>Land Explorer</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#schemeExplorerModal"><i class="bi bi-file-earmark-text me-2"></i>Scheme Finder</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#expertModal"><i class="bi bi-people me-2"></i>Find Experts</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="flex-grow-1 p-3 overflow-auto" style="min-height: 300px; max-height: 60vh;">
+                        <!-- Messages will be dynamically inserted here -->
+                    </div>
+                    
+                    <!-- Quick Replies Container -->
+                    <div id="quickReplies" class="p-2 border-top bg-light">
+                        <!-- Quick reply buttons will be dynamically inserted here -->
+                    </div>
+                    
+                    <!-- Message Input -->
+                    <div class="p-3 border-top bg-white">
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" placeholder="Type your message..." aria-label="Message" aria-describedby="sendMessage">
+                            <button class="btn btn-primary" type="button" id="sendMessage">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Land Explorer Modal -->
+    <div class="modal fade" id="landExplorerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-geo-alt me-2"></i>Land Explorer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="landLocation" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="landLocation" placeholder="Enter location">
+                            </div>
+                            <div class="mb-3">
+                                <label for="landSize" class="form-label">Size (acres)</label>
+                                <select class="form-select" id="landSize">
+                                    <option value="">Any size</option>
+                                    <option value="1-5">1-5 acres</option>
+                                    <option value="5-10">5-10 acres</option>
+                                    <option value="10+">10+ acres</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="landType" class="form-label">Type of Land</label>
+                                <select class="form-select" id="landType">
+                                    <option value="">Any type</option>
+                                    <option value="agricultural">Agricultural</option>
+                                    <option value="orchard">Orchard</option>
+                                    <option value="farmhouse">Farmhouse</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-success w-100" onclick="searchLands()">
+                                <i class="bi bi-search me-2"></i>Search Lands
+                            </button>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="landExplorerMap" style="height: 400px; background-color: #f0f0f0; border-radius: 8px;">
+                                <!-- Map will be rendered here -->
+                                <div class="h-100 d-flex align-items-center justify-content-center">
+                                    <div class="text-center">
+                                        <i class="bi bi-map" style="font-size: 3rem; opacity: 0.5;"></i>
+                                        <p class="mt-2">Map view will be displayed here</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="landResults" class="mt-3">
+                                <!-- Search results will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheme Explorer Modal -->
+    <div class="modal fade" id="schemeExplorerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i>Scheme Finder</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="schemeCategory" class="form-label">Category</label>
+                                <select class="form-select" id="schemeCategory">
+                                    <option value="">All Categories</option>
+                                    <option value="startup">Startup & Entrepreneurship</option>
+                                    <option value="farming">Farming Support</option>
+                                    <option value="land">Land & Resources</option>
+                                    <option value="technology">Technology & Innovation</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="schemeEligibility" class="form-label">Eligibility</label>
+                                <select class="form-select" id="schemeEligibility">
+                                    <option value="">All Farmers</option>
+                                    <option value="small">Small & Marginal Farmers</option>
+                                    <option value="women">Women Farmers</option>
+                                    <option value="scst">SC/ST Farmers</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-info text-white w-100" onclick="searchSchemes()">
+                                <i class="bi bi-search me-2"></i>Find Schemes
+                            </button>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="schemeResults" style="max-height: 400px; overflow-y: auto;">
+                                <!-- Scheme cards will be dynamically inserted here -->
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">PM-KISAN</h5>
+                                        <p class="card-text">Income support of ₹6,000 per year to all farmer families.</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-success">Active</span>
+                                            <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- More scheme cards will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="agrisage.js"></script>
+</body>
+</html>

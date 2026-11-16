@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRI Doctor - Get Started</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="analysis-box">
+            <h1>Let's begin your plant health journey</h1>
+            <p class="subtext">Upload your plant image to start diagnosis.</p>
+            
+            <div class="upload-container" id="uploadContainer">
+                <div class="upload-area" id="dropArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Drag & Drop your image here</h3>
+                    <p>or</p>
+                    <label for="fileInput" class="btn btn-primary">
+                        <i class="fas fa-folder-open"></i> Select Image
+                    </label>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="preview-container" id="previewContainer" style="display: none;">
+                    <div class="image-preview" id="imagePreview"></div>
+                    <div class="preview-actions">
+                        <button class="btn btn-primary" id="analyzeBtn">
+                            <i class="fas fa-search"></i> Analyze Image
+                        </button>
+                        <button class="btn btn-secondary" id="changeImageBtn">
+                            <i class="fas fa-sync-alt"></i> Change Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="analysis-progress" id="analysisProgress" style="display: none;">
+                <h3>Analyzing Your Plant</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p class="status-text" id="statusText">Scanning plant image...</p>
+            </div>
+            
+            <div class="results-container" id="resultsContainer" style="display: none;">
+                <div class="result-header">
+                    <h2 id="diseaseName">Analysis Results</h2>
+                    <div class="confidence-badge" id="confidenceBadge">
+                        <span id="confidenceScore">92%</span> Confidence
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-status" id="resultStatus">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Healthy</span>
+                    </div>
+                    
+                    <div class="disease-details">
+                        <div class="detail-item">
+                            <i class="fas fa-bug"></i>
+                            <div>
+                                <h4>Pathogen Type</h4>
+                                <p id="diseaseType">Fungus</p>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <i class="fas fa-dna"></i>
+                            <div>
+                                <h4>Species</h4>
+                                <p id="diseaseSpecies">Fusarium oxysporum</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="treatment-section">
+                        <div class="section-header">
+                            <i class="fas fa-stethoscope"></i>
+                            <h3>Treatment</h3>
+                        </div>
+                        <ul class="treatment-list" id="treatmentList">
+                            <!-- Filled by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div class="prevention-section">
+                        <div class="section-header">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Prevention</h3>
+                        </div>
+                        <ul class="prevention-list" id="preventionList">
+                            <!-- Filled by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div class="remedies-section">
+                        <div class="section-header">
+                            <i class="fas fa-leaf"></i>
+                            <h3>Natural Remedies</h3>
+                        </div>
+                        <ul class="remedies-list" id="remediesList">
+                            <!-- Filled by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div class="genomics-section">
+                        <div class="section-header">
+                            <i class="fas fa-microscope"></i>
+                            <h3>Genomics Information</h3>
+                        </div>
+                        <div class="genomics-grid" id="genomicsInfo">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="bio-controls-section">
+                        <div class="section-header">
+                            <i class="fas fa-bug"></i>
+                            <h3>Biological Controls</h3>
+                        </div>
+                        <ul class="bio-controls-list" id="bioControlsList">
+                            <!-- Filled by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div class="result-actions">
+                        <button class="btn btn-primary" id="viewReportBtn">
+                            <i class="fas fa-book"></i> View Detailed Report
+                        </button>
+                        <button class="btn btn-secondary" id="newAnalysisBtn">
+                            <i class="fas fa-redo"></i> New Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
